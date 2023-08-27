@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="">
+<head>
+<meta charset="utf-8">
+<title>Loading...</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
+<!-- Load style.css and script.js by default to only rely on "includes:" and local style/scripts tags when really needed -->
+<link rel="stylesheet" type="text/css" href="style.css">
+<script src="script.js"></script>
+</head>
+<body>
+<script>
+const converterOptions = {completeHTMLDocument: false, metadata: true, ghCompatibleHeaderId: true, parseImgDimensions: true, tables: true, backslashEscapesHTMLTags: true};
+async function fetchPage() {
+  var siteParam = new URLSearchParams(window.location.search).get('i');
+  if (siteParam == null || siteParam == "") {
+    siteParam = "index";
+  }
+  // Prevent creation of URLs that fetch other files than .md
+  siteParam = siteParam.slice(siteParam.indexOf('?') + 1);
+  if (siteParam.endsWith("/")) {
+    siteParam+="index.md";
+  }
+  if (!siteParam.endsWith(".md")) {
+    siteParam+=".md";
+  }
+  // Note: URLs are allowed and one can render a GitHub folder with i=https://raw.githubusercontent.com/USER/REPO/BRANCH/FILE.md
+  var response = await (await fetch(siteParam, {cache: "no-cache"})).text();
+  var converter = new showdown.Converter(converterOptions);
+  var htmlData = converter.makeHtml(response), metaData = converter.getMetadata();
+  if (metaData["title"] == null || metaData["title"] == "") {
+    metaData["title"] = "Page";
+  }
+  if (metaData["includes"] == null) {
+    metaData["includes"] = "";
+  }
+  var includes = "";
+  for (const include of metaData["includes"].split(" ").filter(Boolean)) {
+    var includeResponse = await (await fetch(include, {cache: "no-cache"})).text();
+    includes += converter.makeHtml(includeResponse);
+    // Note: Recursive include directives are not supported
+  }
+  document.title = metaData["title"];
+  setInnerHTML(document.body, includes + htmlData);
+}
+// Workaround from https://stackoverflow.com/a/47614491 to execute fetched script tags
+function setInnerHTML(elm, html) {
+  elm.innerHTML = html;
+  Array.from(elm.querySelectorAll("script"))
+    .forEach( oldScriptEl => {
+      const newScriptEl = document.createElement("script");
+      Array.from(oldScriptEl.attributes).forEach( attr => {
+        newScriptEl.setAttribute(attr.name, attr.value);
+      });
+      const scriptText = document.createTextNode(oldScriptEl.innerHTML);
+      newScriptEl.appendChild(scriptText);
+      oldScriptEl.parentNode.replaceChild(newScriptEl, oldScriptEl);
+  });
+}
+fetchPage();
+</script>
+Loading...
+</body>
+</html>

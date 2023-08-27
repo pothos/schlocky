@@ -1,0 +1,53 @@
+html {
+  max-width: 70ch;
+  padding-top: 0;
+  margin: auto;
+  line-height: 1.5;
+  font-size: 1.2em;
+  font-family: sans-serif;
+  animation: fadein 1s;
+}
+
+@keyframes fadein {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+body {
+  background-color: #dfdfdf;
+  padding-top: 0;
+  margin-top: 0;
+  padding-bottom: 3em;
+}
+
+#menu {
+  margin-bottom: 3em;
+  background-color: #4d6996;
+  width: 100%;
+  padding: 1em;
+  margin-top: 0;
+}
+
+#menu a {
+  padding: 0.5em;
+  font-weight: bold;
+  background-color: #cdcdcd;
+  border-radius: 5px;
+  text-decoration: none;
+  color: black;
+}
+
+ul {
+  line-height: 3em;
+}
+
+#footer {
+  text-align: center;
+  background-color: #cdcdcd;
+  position: fixed;
+  padding: 0.5em;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  font-size: 0.7em;
+}
