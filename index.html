@@ -8,6 +8,7 @@
 <link rel="stylesheet" type="text/css" href="style.css">
 <script src="script.js"></script>
 <script>
+var schlockyLast = "";
 async function schlockyFetchPage(params) {
   var siteParam = new URLSearchParams(params).get('i');
   if (siteParam == null || siteParam == "") {
@@ -22,7 +23,6 @@ async function schlockyFetchPage(params) {
     siteParam+=".md";
   }
   // Note: URLs are allowed and one can render a GitHub folder with i=https://raw.githubusercontent.com/USER/REPO/BRANCH/FILE.md
-  // TODO: Check if meant to be a relative movement to current i= value
   var response = await (await fetch(siteParam, {cache: "no-cache"})).text();
   const converterOptions = {completeHTMLDocument: false, metadata: true, ghCompatibleHeaderId: true, parseImgDimensions: true, tables: true, backslashEscapesHTMLTags: true};
   var converter = new showdown.Converter(converterOptions);
@@ -35,12 +35,26 @@ async function schlockyFetchPage(params) {
   }
   var includes = "";
   for (const include of metaData["includes"].split(" ").filter(Boolean)) {
-    var includeResponse = await (await fetch(include, {cache: "no-cache"})).text();
+    var relInclude = schlockyRelative(params, include);
+    var includeResponse = await (await fetch(relInclude, {cache: "no-cache"})).text();
     includes += converter.makeHtml(includeResponse);
     // Note: Recursive include directives are not supported
   }
   document.title = metaData["title"];
   schlockySetInnerHTML(document.body, includes + htmlData);
+  schlockyLast = params;
+}
+function schlockyRelative(baseWithI, targetRef) {
+  // Check if meant to be a relative movement to current i= value
+  if (!targetRef.startsWith("/") && !targetRef.startsWith("http")) {
+    var current = new URLSearchParams(baseWithI).get('i');
+    if (current == null) {
+      current = "";
+    }
+    return current.substring(0, current.lastIndexOf("/") + 1) + targetRef;
+  } else {
+    return targetRef;
+  }
 }
 function schlockyLink(e) {
   if (e.target.tagName !== 'A') {
@@ -54,7 +68,10 @@ function schlockyLink(e) {
   if (index == -1 || (e.target.href.indexOf('#') != -1 && e.target.href.indexOf('#') < index)) {
     return;
   };
-  var targetParam = e.target.href.slice(index + 1);
+  var targetParam = new URLSearchParams(e.target.href.slice(index + 1)).get('i');
+  if (targetParam == null) {
+    targetParam = "";
+  }
   var beforeParam = e.target.href.substring(0, index);
   if (pageBase.endsWith("/")) {
     pageBase += "index.html";
@@ -62,15 +79,18 @@ function schlockyLink(e) {
   if (beforeParam.endsWith("/")) {
     beforeParam += "index.html";
   }
-  // Debug with console.log("pageBase: " + pageBase + ", beforeParam: " + beforeParam + ", targetParam: " + targetParam);
   if (beforeParam != pageBase) {
     return;
   }
-  // TODO: relative links internal and external
+  var current = new URLSearchParams(schlockyLast).get('i');
+  if (current == null) {
+    current = "";
+  }
+  var relParam = "?i=" + schlockyRelative(schlockyLast, targetParam);
   e.preventDefault();
   e.stopPropagation();
-  history.pushState(targetParam, "", "?" + targetParam);
-  schlockyFetchPage(targetParam);
+  history.pushState(relParam, "", relParam);
+  schlockyFetchPage(relParam);
 }
 // Workaround from https://stackoverflow.com/a/47614491 to execute fetched script tags
 function schlockySetInnerHTML(elm, html) {

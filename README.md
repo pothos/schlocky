@@ -9,8 +9,6 @@ Got carried away on a Sunday afternoon and the result is a static site generator
 - has no template language (for now) but allows to prepend shared Markdown/HTML/CSS/JS parts, e.g., for a menu
 - lacks any advanced features!
 
-As future improvement it should also be possible to do relative movements in subfolders or external URLs.
-
 Live demo: [https://pothos.github.io/schlocky/](https://pothos.github.io/schlocky/)
 
 Or use it to render the [Rust contribution guide](https://pothos.github.io/schlocky/?i=https://raw.githubusercontent.com/rust-lang/rust/master/CONTRIBUTING.md).
