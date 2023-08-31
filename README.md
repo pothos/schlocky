@@ -3,12 +3,13 @@
 Got carried away on a Sunday afternoon and the result is a static site generator that…
 
 - requires no build step or deployment pipeline because the Markdown rendering is done in the browser through [showdown](https://github.com/showdownjs/showdown)
+- fetches internal links without a full page reload
 - ships as a single `index.html` file, to use as-is or as base for customizations
 - loads a default style from `style.css` and default Javascript from `scripts.js`, both optional
 - has no template language (for now) but allows to prepend shared Markdown/HTML/CSS/JS parts, e.g., for a menu
 - lacks any advanced features!
 
-As future improvement it would be nice to add Javascript that optimizes all internal links to not to a full reload but only a Javascript fetch while updating the browser address bar with the history API (this should also make it possible to do relative movements in subfolders).
+As future improvement it should also be possible to do relative movements in subfolders or external URLs.
 
 Live demo: [https://pothos.github.io/schlocky/](https://pothos.github.io/schlocky/)
 
@@ -19,7 +20,7 @@ Or use it to render the [Rust contribution guide](https://pothos.github.io/schlo
 The file to render gets specified in the URL as query parameter `?i=FILE`.
 The default file is `index.md`. The `.md` suffix can be omitted, e.g., `/?i=about` (or `/index.html?i=about` if `/` does not directly serve `index.html`). You can even point it to a GitHub branch with `?i=https://raw.githubusercontent.com/USER/REPO/BRANCH/FILE.md`.
 
-This repository already contains example Markdown files, a `style.css` and an empty `scripts.js` file, and a Linux helper script to run a local Python web server to try it out:
+This repository already contains example Markdown files, example `style.css` and `scripts.js` files, and a Linux helper script to run a local Python web server to try it out:
 
 ```
 ./serve.sh

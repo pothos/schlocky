@@ -7,12 +7,9 @@
 <!-- Load style.css and script.js by default to only rely on "includes:" and local style/scripts tags when really needed -->
 <link rel="stylesheet" type="text/css" href="style.css">
 <script src="script.js"></script>
-</head>
-<body>
 <script>
-const converterOptions = {completeHTMLDocument: false, metadata: true, ghCompatibleHeaderId: true, parseImgDimensions: true, tables: true, backslashEscapesHTMLTags: true};
-async function fetchPage() {
-  var siteParam = new URLSearchParams(window.location.search).get('i');
+async function schlockyFetchPage(params) {
+  var siteParam = new URLSearchParams(params).get('i');
   if (siteParam == null || siteParam == "") {
     siteParam = "index";
   }
@@ -25,7 +22,9 @@ async function fetchPage() {
     siteParam+=".md";
   }
   // Note: URLs are allowed and one can render a GitHub folder with i=https://raw.githubusercontent.com/USER/REPO/BRANCH/FILE.md
+  // TODO: Check if meant to be a relative movement to current i= value
   var response = await (await fetch(siteParam, {cache: "no-cache"})).text();
+  const converterOptions = {completeHTMLDocument: false, metadata: true, ghCompatibleHeaderId: true, parseImgDimensions: true, tables: true, backslashEscapesHTMLTags: true};
   var converter = new showdown.Converter(converterOptions);
   var htmlData = converter.makeHtml(response), metaData = converter.getMetadata();
   if (metaData["title"] == null || metaData["title"] == "") {
@@ -41,10 +40,40 @@ async function fetchPage() {
     // Note: Recursive include directives are not supported
   }
   document.title = metaData["title"];
-  setInnerHTML(document.body, includes + htmlData);
+  schlockySetInnerHTML(document.body, includes + htmlData);
+}
+function schlockyLink(e) {
+  if (e.target.tagName !== 'A') {
+    return;
+  }
+  var pageBase = window.location.href.split("?")[0].split("#")[0];
+  if (!e.target.href.startsWith(pageBase)) {
+    return;
+  }
+  var index = e.target.href.indexOf('?');
+  if (index == -1 || (e.target.href.indexOf('#') != -1 && e.target.href.indexOf('#') < index)) {
+    return;
+  };
+  var targetParam = e.target.href.slice(index + 1);
+  var beforeParam = e.target.href.substring(0, index);
+  if (pageBase.endsWith("/")) {
+    pageBase += "index.html";
+  }
+  if (beforeParam.endsWith("/")) {
+    beforeParam += "index.html";
+  }
+  // Debug with console.log("pageBase: " + pageBase + ", beforeParam: " + beforeParam + ", targetParam: " + targetParam);
+  if (beforeParam != pageBase) {
+    return;
+  }
+  // TODO: relative links internal and external
+  e.preventDefault();
+  e.stopPropagation();
+  history.pushState(targetParam, "", "?" + targetParam);
+  schlockyFetchPage(targetParam);
 }
 // Workaround from https://stackoverflow.com/a/47614491 to execute fetched script tags
-function setInnerHTML(elm, html) {
+function schlockySetInnerHTML(elm, html) {
   elm.innerHTML = html;
   Array.from(elm.querySelectorAll("script"))
     .forEach( oldScriptEl => {
@@ -57,7 +86,18 @@ function setInnerHTML(elm, html) {
       oldScriptEl.parentNode.replaceChild(newScriptEl, oldScriptEl);
   });
 }
-fetchPage();
+</script>
+</head>
+<body>
+<script>
+// Catch internal links and optimze the page reload away
+document.addEventListener('click', schlockyLink, false);
+window.addEventListener("popstate", (event) => {
+  var index = document.location.href.indexOf('?');
+  var targetParam = document.location.href.slice(index + 1);
+  schlockyFetchPage(targetParam);
+});
+schlockyFetchPage(window.location.search);
 </script>
 Loading...
 </body>

@@ -8,3 +8,7 @@ includes: menu.md
 After the initial announcement we can now show pictures:
 
 ![alt text](example.png)
+
+<script>
+sayHello();
+</script>
