@@ -9,6 +9,8 @@ Got carried away on a Sunday afternoon and the result is a static site generator
 - has no template language (for now) but allows to prepend shared Markdown/HTML/CSS/JS parts, e.g., for a menu
 - lacks any advanced features!
 
+As improvement one could do the link rewriting after fetching to show the final links in the tooltip and retain the base path context for links in includes that are relative.
+
 Live demo: [https://pothos.github.io/schlocky/](https://pothos.github.io/schlocky/)
 
 Or use it to render the [Rust contribution guide](https://pothos.github.io/schlocky/?i=https://raw.githubusercontent.com/rust-lang/rust/master/CONTRIBUTING.md).
@@ -16,7 +18,7 @@ Or use it to render the [Rust contribution guide](https://pothos.github.io/schlo
 ## Usage
 
 The file to render gets specified in the URL as query parameter `?i=FILE`.
-The default file is `index.md`. The `.md` suffix can be omitted, e.g., `/?i=about` (or `/index.html?i=about` if `/` does not directly serve `index.html`). You can even point it to a GitHub branch with `?i=https://raw.githubusercontent.com/USER/REPO/BRANCH/FILE.md`.
+The default file is `index.md`. The `.md` suffix can be omitted, e.g., `/?i=about` (or `/index.html?i=about` if `/` does not directly serve `index.html`). You can even point it to a GitHub branch with `?i=https://raw.githubusercontent.com/USER/REPO/BRANCH/FILE.md`. Note that the paths are resolved with the `index.html` folder path prepended to absolute and relative paths. For external HTTP paths relative movement works but absolute paths will be resolved according to the current page.
 
 This repository already contains example Markdown files, example `style.css` and `scripts.js` files, and a Linux helper script to run a local Python web server to try it out:
 

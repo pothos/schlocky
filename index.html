@@ -23,6 +23,11 @@ async function schlockyFetchPage(params) {
     siteParam+=".md";
   }
   // Note: URLs are allowed and one can render a GitHub folder with i=https://raw.githubusercontent.com/USER/REPO/BRANCH/FILE.md
+  var indexPathEnd = window.location.pathname.lastIndexOf("/");
+  var prependedPathForAbsoluteLinks = window.location.pathname.substring(0, indexPathEnd + 1) + "./";
+  if (!siteParam.startsWith("http")) {
+    siteParam = prependedPathForAbsoluteLinks + siteParam;
+  }
   var response = await (await fetch(siteParam, {cache: "no-cache"})).text();
   const converterOptions = {completeHTMLDocument: false, metadata: true, ghCompatibleHeaderId: true, parseImgDimensions: true, tables: true, backslashEscapesHTMLTags: true};
   var converter = new showdown.Converter(converterOptions);
@@ -36,6 +41,9 @@ async function schlockyFetchPage(params) {
   var includes = "";
   for (const include of metaData["includes"].split(" ").filter(Boolean)) {
     var relInclude = schlockyRelative(params, include);
+    if (!relInclude.startsWith("http")) {
+      relInclude = prependedPathForAbsoluteLinks + relInclude;
+    }
     var includeResponse = await (await fetch(relInclude, {cache: "no-cache"})).text();
     includes += converter.makeHtml(includeResponse);
     // Note: Recursive include directives are not supported
