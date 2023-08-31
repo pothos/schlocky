@@ -39,11 +39,11 @@ includes: menu.md
 Here is the *index* page!
 ```
 
-The `menu.md` could contain this (`?` instead of `/` to also work if served from subfolders):
+The `menu.md` could contain this (here absolute paths are used to make the links also work when opened from subfolders where the menu is included with `includes: ../menu.md`, as the main page URL path still gets prepended to absolute links):
 
 ```
-* [Index](?)
-* [About](?i=about)
+* [Index](?=/)
+* [About](?i=/about)
 ```
 
 And `about.md` could be:
